@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Cover Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="assets/css/cover.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="site-wrapper">
+
+      <div class="site-wrapper-inner">
+
+        <div class="cover-container">
+
+          <div class="inner cover">
+            <p>Press any key to start!</p>
+            <p id="wins"></p>
+            <p id="currentWord"></p>
+            <p id="remainingGuesses"></p>
+            <p id="guessedLetters"></p>
+            <p id="gameResult"></p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  	
+
+  	<script type="text/javascript">
+
+  		var userGuess;
+  		
+
+  		//these will be the words players try to guess. Theme is 80's arcade games.
+  		var wordBank = ["galaga", "pac man", "donkey kong", "frogger",];
+
+  		//# of times user guessed the word correctly
+  		var wins = 0;
+
+  		//defines how many guesses a player is allowed before loosing. Each time the suggested letter does not occur in the word, they player will loose a guess
+  		var remainingGuesses = 6;
+
+  		//displayes the word player is trying to guess as "--- ---". If player guesses a letter, it will revealed: "p-- ---"
+  		var currentWord = [];
+ 		
+ 		// stores the letters a player guessed in array
+  		var guessedLetters = [];
+
+  		//current index of the wordBank array
+  		var wordBankIndex;
+
+  		//hangman object
+  		var hangmanGame = {
+
+  			newRound: function () {
+  				remainingGuesses = 6;
+  				guessedLetters = [];
+  				currentWord = [];
+  			},
+
+  			setupGame: function () {
+
+          document.getElementById("wins").innerHTML = "Wins: " + wins;
+          document.getElementById("remainingGuesses").innerHTML = "Number of guesses remaining: " + remainingGuesses;
+          document.getElementById("guessedLetters").innerHTML = "Letters already guessed: " + guessedLetters;
+  				//gets a random index of the wordBank array and stores it in a var
+  				currentWordBankIndex = Math.floor(Math.random() * wordBank.length);
+
+  				//prevents player from having to guess same word twice in a row
+  				while (currentWordBankIndex === wordBankIndex) {
+  					currentWordBankIndex = Math.floor(Math.random() * wordBank.length);
+  				};
+
+  				wordBankIndex = currentWordBankIndex;
+  				
+  				//represent the word player has to guess as "-"
+  				for (var i = 0; i < wordBank[wordBankIndex].length; i++) {
+
+  					//if there is a space in the word being guessed, represents that space in the currentWord array
+  					if (wordBank[wordBankIndex].charAt(i) === " ") {
+  						currentWord.push("&nbsp&nbsp&nbsp");
+
+  					} else {
+  						currentWord.push("_ ");
+  					};
+
+  				};
+
+  				document.getElementById("currentWord").innerHTML = currentWord.join("");
+
+  			},
+
+  			guessHandling: function () {
+
+  				//for determining if the guessed letter exist in the string
+  				var letterExist = false;
+
+  				//for determining if the palyer has guessed all leters in the word
+  				var dashExist = false;
+
+
+  				// for determining if the players guess has already been recorded in the guessedLetters array
+  				var letterRecorded = false;
+
+  				for (var i = 0; i < wordBank[wordBankIndex].length; i++) {
+
+  					//overwrites currentWord array @ i with correct guess
+  					if (wordBank[wordBankIndex].charAt(i) === userGuess) {
+  						currentWord[i] = userGuess + " ";
+              document.getElementById("currentWord").innerHTML = currentWord.join("");
+              console.log(currentWord);
+  						letterExist = true;
+  					};
+
+  					//sets dashExist to true if there are remaining dashes in the currentWord Array
+	  				if (currentWord[i] === "_ ") {
+	  					dashExist = true;
+	  				};
+
+  				};
+
+  				//if letterExist is still false, then the userGuess was not found in the string, decrement remainingGuesses
+  				if (!letterExist) {
+  					remainingGuesses--;
+            document.getElementById("remainingGuesses").innerHTML = "Number of guesses remaining: " + remainingGuesses;
+  				};
+
+
+  				//determines if the players guess has been recorded in the guessedLetters array
+  				for (var i = 0; i < guessedLetters.length; i++) {
+
+  					if (guessedLetters[i] === userGuess) {
+  						letterRecorded = true;
+  					};
+  				};
+
+  				//if letterRecorded is still false, then the players guess has not been stored in the guessedLetters array, add players
+  				//players guess to guessedLetters array 
+  				if (!letterRecorded) {
+  					//stores the user guess in the guessedLetters array
+      				guessedLetters.push(userGuess);
+      				document.getElementById("guessedLetters").innerHTML = "Letters already guessed: " + guessedLetters;
+  				};
+
+  				//if dashExist is still false, that means no more "-" exist in the currentWord array. Player wins! Automatically goes into next word
+  				if (!dashExist && remainingGuesses !== 0) {
+  					
+  					wins++
+  					document.getElementById("wins").innerHTML = "Wins: " + wins;
+            document.getElementById("gameResult").innerHTML = "You Win! Starting new round!";
+            
+            var that = this;
+
+            setTimeout(function(){ 
+
+            that.newRound();
+            that.setupGame();
+            document.getElementById("gameResult").innerHTML = ""; 
+
+            }, 1500);
+             
+  				};
+
+  				//if the player has no more remainingGuesses, automatically start a new round
+  				if (remainingGuesses === 0) {
+
+  					document.getElementById("gameResult").innerHTML = "You Loose! Starting new round!";
+            
+            var that = this;
+
+            setTimeout(function(){ 
+
+            that.newRound();
+            that.setupGame();
+            document.getElementById("gameResult").innerHTML = ""; 
+
+            }, 1000);
+
+  				};
+
+  			},
+  		};	
+
+  		hangmanGame.setupGame();
+  		
+		  //this function is run whenever the user presses a key.
+    	document.onkeyup = function(event) {
+
+      		//determines which key was pressed.
+      		userGuess = event.key.toLowerCase();
+
+      		//run the guess handling method everytime a key is pressed
+      		hangmanGame.guessHandling();
+
+    	};
+
+  	</script>  
+  </body>
+</html>
